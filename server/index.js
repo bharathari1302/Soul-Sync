@@ -46,9 +46,31 @@ app.get('/api/quizzes', (req, res) => {
 });
 
 // Serve Static Frontend (Production)
+// Serve Static Frontend (Production)
 const clientBuildPath = path.join(__dirname, '../client/dist');
+const parentDir = path.join(__dirname, '../');
+
 if (fs.existsSync(clientBuildPath)) {
     app.use(express.static(clientBuildPath));
+} else {
+    // Debug info if build is missing
+    app.get('/', (req, res) => {
+        let debugInfo = `<h1>Deployment Pending or Failed</h1>`;
+        debugInfo += `<p>Expected Client Path: ${clientBuildPath}</p>`;
+        debugInfo += `<p>Exists: ${fs.existsSync(clientBuildPath)}</p>`;
+
+        try {
+            const files = fs.readdirSync(parentDir);
+            debugInfo += `<p>Contents of ${parentDir}: ${JSON.stringify(files)}</p>`;
+            if (files.includes('client')) {
+                const clientFiles = fs.readdirSync(path.join(parentDir, 'client'));
+                debugInfo += `<p>Contents of client: ${JSON.stringify(clientFiles)}</p>`;
+            }
+        } catch (e) {
+            debugInfo += `<p>Error listing files: ${e.message}</p>`;
+        }
+        res.send(debugInfo);
+    });
 }
 
 app.post('/api/quizzes', (req, res) => {
