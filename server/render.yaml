@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: soul-sync-server
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    branch: main
+    envVars:
+      - key: NODE_VERSION
+        value: 20.x
