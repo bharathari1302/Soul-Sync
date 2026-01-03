@@ -28,8 +28,8 @@ const QuizEditor = ({ user, onCancel, onSave }) => {
         };
 
         try {
-            const apiBase = `${window.location.protocol}//${window.location.hostname}:3000`;
-            const res = await fetch(`${apiBase}/api/quizzes`, {
+            // Use relative path for production/tunnel compatibility
+            const res = await fetch('/api/quizzes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newQuiz)

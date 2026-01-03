@@ -64,15 +64,13 @@ const AdminDashboard = () => {
 
     const fetchQuizzes = async () => {
         try {
-            const apiBase = `${window.location.protocol}//${window.location.hostname}:3000`;
-            const res = await fetch(`${apiBase}/api/quizzes`);
+            // Use relative path - works for Create React App / Vite proxy in dev AND production/tunnel
+            const res = await fetch('/api/quizzes');
             if (res.ok) {
                 const data = await res.json();
                 setQuizzes(data);
             } else {
                 console.error("Failed to fetch quizzes");
-                // Fallback to local if totally unreachable? 
-                // Taking "Server Side Storage" literally as the source of truth.
                 setQuizzes([]);
             }
         } catch (err) {
@@ -83,18 +81,18 @@ const AdminDashboard = () => {
     const deleteQuiz = async (id) => {
         if (!window.confirm("Delete this quiz?")) return;
 
-        if (id.startsWith('local_')) {
-            const localQuizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-            const updated = localQuizzes.filter(q => q.id !== id);
-            localStorage.setItem('quizzes', JSON.stringify(updated));
+        // Optimistic / Local cleanup
+        const localQuizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+        const updated = localQuizzes.filter(q => q.id !== id);
+        localStorage.setItem('quizzes', JSON.stringify(updated));
+
+        try {
+            await fetch(`/api/quizzes/${id}`, { method: 'DELETE' });
             fetchQuizzes();
-            try {
-                const apiBase = `${window.location.protocol}//${window.location.hostname}:3000`;
-                await fetch(`${apiBase}/api/quizzes/${id}`, { method: 'DELETE' });
-                fetchQuizzes();
-            } catch (err) {
-                alert("Error deleting quiz");
-            }
+        } catch (err) {
+            console.error("Error deleting quiz", err);
+            // Re-fetch to ensure sync
+            fetchQuizzes();
         }
     };
 
