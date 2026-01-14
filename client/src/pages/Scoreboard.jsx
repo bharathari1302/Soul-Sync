@@ -168,7 +168,7 @@ const Scoreboard = () => {
             justifyContent: 'center',
             fontFamily: "'Outfit', sans-serif"
         }}>
-            <SEO title="Scoreboard - Soul Sync" description="Live game results and leaderboard." name="Soul Sync" type="website" />
+            <SEO title="Scoreboard - Soul Sync" description="Live game results and leaderboard." name="Soul Sync" type="website" keywords="soul sync scores, couple compatibility results, game winner, relationship sync score, leaderboard" />
             {/* Background Animation Elements (Abstract blobs) */}
             <div className="blob" style={{ position: 'absolute', top: '10%', left: '10%', width: '300px', height: '300px', background: '#ff0055', filter: 'blur(100px)', opacity: 0.4, borderRadius: '50%' }}></div>
             <div className="blob" style={{ position: 'absolute', bottom: '10%', right: '10%', width: '400px', height: '400px', background: '#00ccff', filter: 'blur(120px)', opacity: 0.3, borderRadius: '50%' }}></div>

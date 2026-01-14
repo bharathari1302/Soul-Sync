@@ -7,7 +7,7 @@ const Landing = () => {
 
     return (
         <div className="container flex-center" style={{ flexDirection: 'column', height: '80vh' }}>
-            <SEO title="Soul Sync - Home" description="Can you sync with your partner? Join the ultimate couple's compatibility game!" name="Soul Sync" type="website" />
+            <SEO title="Soul Sync - Home" description="Can you sync with your partner? Join the ultimate couple's compatibility game!" name="Soul Sync" type="website" keywords="couples game, compatibility test, relationship quiz, soul sync, multiplayer game, love calculator, sync test" />
             <h1 className="logo">SOUL SYNC</h1>
             <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '3rem' }}>
                 Can you sync with your partner?

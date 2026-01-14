@@ -117,7 +117,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="container">
-            <SEO title="Admin Dashboard - Soul Sync" description="Manage quizzes and control the game live." name="Soul Sync" type="website" />
+            <SEO title="Admin Dashboard - Soul Sync" description="Manage quizzes and control the game live." name="Soul Sync" type="website" keywords="soul sync admin, game control, quiz master, couple game dashboard" />
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
                 <h1>Admin Dashboard</h1>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>

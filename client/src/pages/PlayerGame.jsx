@@ -216,7 +216,7 @@ const PlayerGame = () => {
 
     return (
         <div className="container flex-center" style={{ minHeight: '80vh' }}>
-            <SEO title="Play Game - Soul Sync" description="Join the game, finding your partner and sync your souls!" name="Soul Sync" type="website" />
+            <SEO title="Play Game - Soul Sync" description="Join the game, finding your partner and sync your souls!" name="Soul Sync" type="website" keywords="join soul sync, multiplayer couples game, play soul sync, sync with partner, couple quiz" />
 
             {step === 'join' && (
                 <div className="glass-panel" style={{ width: '400px' }}>
