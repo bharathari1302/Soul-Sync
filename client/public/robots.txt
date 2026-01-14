@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://soul-sync-w20v.onrender.com/sitemap.xml

@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 const Landing = () => {
     const navigate = useNavigate();
 
     return (
         <div className="container flex-center" style={{ flexDirection: 'column', height: '80vh' }}>
+            <SEO title="Soul Sync - Home" description="Can you sync with your partner? Join the ultimate couple's compatibility game!" name="Soul Sync" type="website" />
             <h1 className="logo">SOUL SYNC</h1>
             <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '3rem' }}>
                 Can you sync with your partner?

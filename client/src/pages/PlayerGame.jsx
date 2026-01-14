@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../socket';
+import SEO from '../components/SEO';
 
 // Player Game doesn't need Firebase Auth, just anonymous socket/pseudo-auth via simple names
 const PlayerGame = () => {
@@ -215,6 +216,7 @@ const PlayerGame = () => {
 
     return (
         <div className="container flex-center" style={{ minHeight: '80vh' }}>
+            <SEO title="Play Game - Soul Sync" description="Join the game, finding your partner and sync your souls!" name="Soul Sync" type="website" />
 
             {step === 'join' && (
                 <div className="glass-panel" style={{ width: '400px' }}>
