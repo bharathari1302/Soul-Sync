@@ -18,32 +18,8 @@ const io = new Server(server, {
     }
 });
 
-// --- QUIZ STORAGE (File System) ---
-const QUIZZES_FILE = path.join(__dirname, 'quizzes.json');
-
-const readQuizzes = () => {
-    try {
-        if (!fs.existsSync(QUIZZES_FILE)) fs.writeFileSync(QUIZZES_FILE, '[]');
-        const data = fs.readFileSync(QUIZZES_FILE, 'utf8');
-        return JSON.parse(data || '[]');
-    } catch (err) {
-        console.error("Error reading quizzes:", err);
-        return [];
-    }
-};
-
-const writeQuizzes = (quizzes) => {
-    try {
-        fs.writeFileSync(QUIZZES_FILE, JSON.stringify(quizzes, null, 2));
-    } catch (err) {
-        console.error("Error writing quizzes:", err);
-    }
-};
-
 // --- API Endpoints ---
-app.get('/api/quizzes', (req, res) => {
-    res.json(readQuizzes());
-});
+// Quizzes are now handled by Firebase Firestore on the client side.
 
 // Serve Static Frontend (Production)
 // Serve Static Frontend (Production)
@@ -73,20 +49,7 @@ if (fs.existsSync(clientBuildPath)) {
     });
 }
 
-app.post('/api/quizzes', (req, res) => {
-    const quizzes = readQuizzes();
-    const newQuiz = { ...req.body, id: Date.now().toString(), createdAt: new Date().toISOString() };
-    quizzes.push(newQuiz);
-    writeQuizzes(quizzes);
-    res.json(newQuiz);
-});
-
-app.delete('/api/quizzes/:id', (req, res) => {
-    let quizzes = readQuizzes();
-    quizzes = quizzes.filter(q => q.id !== req.params.id);
-    writeQuizzes(quizzes);
-    res.json({ success: true });
-});
+// Old API endpoints removed. Client uses Firebase.
 
 // Game State
 

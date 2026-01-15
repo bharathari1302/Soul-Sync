@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 const QuizEditor = ({ user, onCancel, onSave }) => {
     const [quizName, setQuizName] = useState('');
@@ -24,26 +26,17 @@ const QuizEditor = ({ user, onCancel, onSave }) => {
         const newQuiz = {
             name: quizName,
             questions,
-            createdBy: user.email // Just for record, not auth check on server
+            createdBy: user.email,
+            createdAt: new Date().toISOString()
         };
 
         try {
-            // Use relative path for production/tunnel compatibility
-            const res = await fetch('/api/quizzes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newQuiz)
-            });
-
-            if (res.ok) {
-                alert('Quiz Saved Successfully to Server!');
-                onSave();
-            } else {
-                throw new Error('Server returned error');
-            }
+            await addDoc(collection(db, "quizzes"), newQuiz);
+            alert('Quiz Saved Successfully to Firestore!');
+            onSave();
         } catch (error) {
             console.error("Save Error:", error);
-            alert(`Error saving to server: ${error.message}`);
+            alert(`Error saving to Firestore: ${error.message}`);
         } finally {
             setLoading(false);
         }

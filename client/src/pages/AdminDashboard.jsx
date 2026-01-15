@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../socket';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import AdminLogin from '../components/AdminLogin';
 import QuizEditor from '../components/QuizEditor';
 import SEO from '../components/SEO';
@@ -65,17 +66,15 @@ const AdminDashboard = () => {
 
     const fetchQuizzes = async () => {
         try {
-            // Use relative path - works for Create React App / Vite proxy in dev AND production/tunnel
-            const res = await fetch('/api/quizzes');
-            if (res.ok) {
-                const data = await res.json();
-                setQuizzes(data);
-            } else {
-                console.error("Failed to fetch quizzes");
-                setQuizzes([]);
-            }
+            const querySnapshot = await getDocs(collection(db, "quizzes"));
+            const data = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setQuizzes(data);
         } catch (err) {
-            console.error("API Error:", err);
+            console.error("Firestore Error:", err);
+            // Don't clear quizzes on error to avoid flashing empty state if just offline
         }
     };
 
@@ -83,17 +82,16 @@ const AdminDashboard = () => {
         if (!window.confirm("Delete this quiz?")) return;
 
         // Optimistic / Local cleanup
-        const localQuizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-        const updated = localQuizzes.filter(q => q.id !== id);
-        localStorage.setItem('quizzes', JSON.stringify(updated));
+        const previousQuizzes = quizzes;
+        setQuizzes(quizzes.filter(q => q.id !== id));
 
         try {
-            await fetch(`/api/quizzes/${id}`, { method: 'DELETE' });
-            fetchQuizzes();
+            await deleteDoc(doc(db, "quizzes", id));
         } catch (err) {
             console.error("Error deleting quiz", err);
-            // Re-fetch to ensure sync
-            fetchQuizzes();
+            // Revert on error
+            setQuizzes(previousQuizzes);
+            alert("Failed to delete quiz from server.");
         }
     };
 
