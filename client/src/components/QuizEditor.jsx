@@ -31,12 +31,22 @@ const QuizEditor = ({ user, onCancel, onSave }) => {
         };
 
         try {
-            await addDoc(collection(db, "quizzes"), newQuiz);
+            // Add a timeout promise
+            const saveTimeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Request Timed Out (Check Firestore Rules or Internet)")), 10000)
+            );
+
+            // Race the save against the timeout
+            await Promise.race([
+                addDoc(collection(db, "quizzes"), newQuiz),
+                saveTimeout
+            ]);
+
             alert('Quiz Saved Successfully to Firestore!');
             onSave();
         } catch (error) {
             console.error("Save Error:", error);
-            alert(`Error saving to Firestore: ${error.message}`);
+            alert(`Error saving to Firestore: ${error.message}\n\nCommon Causes:\n1. Firestore Rules set to 'Locked Mode'\n2. Firebase config mismatch\n3. No internet connection`);
         } finally {
             setLoading(false);
         }
