@@ -13,6 +13,9 @@ const AdminDashboard = () => {
     const [quizzes, setQuizzes] = useState([]);
     const [gameState, setGameState] = useState({ isActive: false, currentQ: null, currentQIndex: -1 });
     const [teams, setTeams] = useState({});
+    const [connected, setConnected] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [serverId, setServerId] = useState('N/A');
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -23,7 +26,25 @@ const AdminDashboard = () => {
             }
         });
 
+        const onConnect = () => {
+            setConnected(true);
+            if (auth.currentUser) {
+                console.log("Socket connected, re-logging as admin...");
+                socket.emit('admin_login');
+            }
+        };
+
+        const onDisconnect = () => {
+            setConnected(false);
+            setIsAdmin(false);
+        };
+
+        socket.on('connect', onConnect);
+        socket.on('disconnect', onDisconnect);
+
         socket.on('admin_data', (data) => {
+            setIsAdmin(true);
+            setServerId(data.gameState.sessionId || 'Unknown');
             setTeams(data.teams || {});
             setGameState(prev => ({
                 ...prev,
@@ -56,6 +77,8 @@ const AdminDashboard = () => {
 
         return () => {
             unsubscribe();
+            socket.off('connect', onConnect);
+            socket.off('disconnect', onDisconnect);
             socket.off('admin_data');
             socket.off('admin_teams_update');
             socket.off('new_question');
@@ -74,6 +97,7 @@ const AdminDashboard = () => {
             setQuizzes(data);
         } catch (err) {
             console.error("Firestore Error:", err);
+            alert("Firestore Fetch Error: " + err.message);
             // Don't clear quizzes on error to avoid flashing empty state if just offline
         }
     };
@@ -119,6 +143,10 @@ const AdminDashboard = () => {
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
                 <h1>Admin Dashboard</h1>
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+                        <span style={{ color: connected ? '#00ee00' : '#ee0000' }}>●</span>
+                        <span>{connected ? (isAdmin ? `Connected: ${serverId}` : 'Socket Connected (Waiting Auth)') : 'Disconnected'}</span>
+                    </div>
                     <button className="btn btn-secondary" onClick={() => window.open('/scoreboard', '_blank')}>Open Projector View</button>
                     <span>{user.email}</span>
                     <button className="btn btn-secondary" onClick={() => signOut(auth)}>Logout</button>
@@ -139,9 +167,31 @@ const AdminDashboard = () => {
                                         background: 'rgba(255,255,255,0.1)',
                                         padding: '0.5rem 1rem',
                                         borderRadius: '20px',
-                                        fontSize: '0.9rem'
+                                        fontSize: '0.9rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem'
                                     }}>
-                                        {t.members.map(m => m.name).join(' & ')}
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontWeight: 'bold' }}>{t.members.map(m => m.name).join(' & ')}</span>
+                                            <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>Code: {t.code}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => socket.emit('remove_team', { teamCode: t.code })}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: '#ff4444',
+                                                cursor: 'pointer',
+                                                fontSize: '1.2rem',
+                                                padding: '0 0.2rem',
+                                                fontWeight: 'bold',
+                                                lineHeight: '1'
+                                            }}
+                                            title="Remove Team"
+                                        >
+                                            ×
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -154,7 +204,12 @@ const AdminDashboard = () => {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                        {quizzes.length === 0 && <p style={{ opacity: 0.5 }}>No quizzes found. Create one to get started!</p>}
+                        {quizzes.length === 0 && (
+                            <div style={{ opacity: 0.5, gridColumn: '1/-1', textAlign: 'center', padding: '2rem' }}>
+                                <p>No quizzes found in collection 'quizzes'.</p>
+                                <p style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>Check your Firebase Console or create one below.</p>
+                            </div>
+                        )}
                         {quizzes.map(q => (
                             <div key={q.id} className="glass-panel" style={{ transition: 'transform 0.2s', cursor: 'default' }}>
                                 <h3 style={{ marginBottom: '0.5rem' }}>{q.name}</h3>
@@ -209,8 +264,25 @@ const AdminDashboard = () => {
                     <div style={{ marginTop: '2rem', textAlign: 'left', maxHeight: '300px', overflowY: 'auto' }}>
                         <h3>Teams</h3>
                         {Object.values(teams).map(t => (
-                            <div key={t.code} style={{ padding: '0.5rem', borderBottom: '1px solid #333' }}>
-                                {t.members.map(m => m.name).join(' & ')} - {t.score}pts
+                            <div key={t.code} style={{ padding: '0.5rem', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 'bold' }}>{t.members.map(m => m.name).join(' & ')} - {t.score}pts</span>
+                                    <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>Code: {t.code}</span>
+                                </div>
+                                <button
+                                    onClick={() => socket.emit('remove_team', { teamCode: t.code })}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: '#ff4444',
+                                        cursor: 'pointer',
+                                        fontSize: '1.2rem',
+                                        fontWeight: 'bold'
+                                    }}
+                                    title="Remove Team"
+                                >
+                                    ×
+                                </button>
                             </div>
                         ))}
                     </div>

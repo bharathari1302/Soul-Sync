@@ -252,6 +252,30 @@ const PlayerGame = () => {
                         {teamMembers.length < 2 && <p style={{ color: 'var(--accent-color)', marginTop: '1rem' }}>Waiting for partner...</p>}
                         {teamMembers.length === 2 && <p style={{ color: 'var(--secondary-color)', marginTop: '1rem' }}>Ready! Waiting for Admin to start...</p>}
                     </div>
+
+                    <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem', textAlign: 'left' }}>
+                        <h3 style={{ textAlign: 'center', marginBottom: '1rem' }}>Rules & Regulations</h3>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', fontSize: '0.9rem' }}>
+                            <div>
+                                <h4 style={{ color: 'var(--secondary-color)', marginBottom: '0.5rem' }}>Do's</h4>
+                                <ul style={{ listStyle: 'none', padding: 0 }}>
+                                    <li style={{ marginBottom: '0.5rem' }}>✅ Stay in Fullscreen mode.</li>
+                                    <li style={{ marginBottom: '0.5rem' }}>✅ Sync your answers with your partner.</li>
+                                    <li style={{ marginBottom: '0.5rem' }}>✅ Stay focused on this tab.</li>
+                                    <li style={{ marginBottom: '0.5rem' }}>✅ Stay away from your friend while playing.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 style={{ color: 'var(--accent-color)', marginBottom: '0.5rem' }}>Don'ts</h4>
+                                <ul style={{ listStyle: 'none', padding: 0 }}>
+                                    <li style={{ marginBottom: '0.5rem' }}>❌ No tab switching or minimizing.</li>
+                                    <li style={{ marginBottom: '0.5rem' }}>❌ No exiting fullscreen during the game.</li>
+                                    <li style={{ marginBottom: '0.5rem' }}>❌ No Developer Tools (F12) or Right-click.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 

@@ -53,12 +53,15 @@ if (fs.existsSync(clientBuildPath)) {
 
 // Game State
 
+const serverSessionId = Math.random().toString(36).substring(7).toUpperCase();
+console.log(`Server Session ID: ${serverSessionId}`);
+
 // Game State
 let gameState = {
     questions: [],
     currentQuestionIndex: -1,
     isActive: false,
-    // timer: removed from public state to avoid circular dependency
+    sessionId: serverSessionId
 };
 let gameTimer = null;
 
@@ -77,6 +80,7 @@ io.on('connection', (socket) => {
     // --- ADMIN EVENTS ---
     socket.on('admin_login', () => {
         admins.add(socket.id);
+        console.log(`[${serverSessionId}] Admin logged in: ${socket.id}`);
         socket.emit('admin_data', { teams, gameState });
     });
 
@@ -273,9 +277,33 @@ io.on('connection', (socket) => {
         io.emit('teams_cleared'); // Tell clients to go back to Join screen
     });
 
+    socket.on('remove_team', ({ teamCode }) => {
+        console.log(`Removal request for team: ${teamCode} from socket: ${socket.id}`);
+        if (!admins.has(socket.id)) {
+            console.log(`Removal rejected: Socket ${socket.id} is not an admin.`);
+            return;
+        }
+
+        if (teams[teamCode]) {
+            // Notify the specific team members to reset
+            io.to(teamCode).emit('teams_cleared');
+
+            console.log(`Team ${teamCode} removed by admin.`);
+
+            // Delete the team
+            delete teams[teamCode];
+
+            // Sync with all admins
+            io.emit('admin_teams_update', teams);
+        } else {
+            console.log(`Removal failed: Team ${teamCode} not found.`);
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
-        // Cleanup if needed (remove from teams? might annoy users if momentary disconnect)
+        // Remove from admins set to keep it clean, though not strictly necessary
+        admins.delete(socket.id);
     });
 });
 
