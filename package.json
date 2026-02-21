@@ -1,0 +1,8 @@
+{
+    "name": "soul-sync-root",
+    "private": true,
+    "scripts": {
+        "build": "cd client && npm run build",
+        "install": "cd client && npm install --legacy-peer-deps"
+    }
+}
